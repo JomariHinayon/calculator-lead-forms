@@ -12,7 +12,6 @@ class LeadListCreate(generics.ListCreateAPIView):
 class LeadDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Lead.objects.all()
     serializer_class = LeadSerializer
-
 @csrf_exempt  # Use this for testing; consider using CSRF protection in production
 def create_lead(request):
     if request.method == 'POST':

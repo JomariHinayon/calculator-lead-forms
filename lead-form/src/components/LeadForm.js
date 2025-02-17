@@ -1,20 +1,20 @@
 import React, { useState } from "react";
 import "./LeadForm.css";
+import axios from 'axios'; // Import axios for making HTTP requests
 
 const LeadForm = () => {
   const [formData, setFormData] = useState({
     name: "",
     email: "",
-    phone: "",
+    phone: "", 
     loanAmount: "",
     loanTerm: "",
-    interestRate: "5.99", // Default interest rate
+    interestRate: "", // Removed default value
     monthlyIncome: "",
   });
 
   const [result, setResult] = useState(null);
   const [step, setStep] = useState(1);
-  const [submissionStatus, setSubmissionStatus] = useState("");
 
   const calculateLoan = () => {
     const principal = parseFloat(formData.loanAmount);
@@ -35,43 +35,42 @@ const LeadForm = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    console.log(`Input changed: ${name} = ${value}`); // Log the input change
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const calculations = calculateLoan();
     setResult(calculations);
     setStep(2);
-  };
 
-  const handleLeadCaptureSubmit = async (e) => {
-    e.preventDefault();
+    const leadData = {
+        name: formData.name,
+        email: formData.email,
+        phone: formData.phone,
+        loan_amount: parseFloat(formData.loanAmount),
+        loan_term: parseInt(formData.loanTerm, 10),
+        interest_rate: parseFloat(formData.interestRate),
+        monthly_income: parseFloat(formData.monthlyIncome),
+        message: "",
+    };
+
+    console.log("Form Data:", leadData); // Log the data being sent
+
+    if (!leadData.name || !leadData.email || !leadData.phone || !leadData.loan_amount || !leadData.loan_term || !leadData.interest_rate) {
+        console.error("All fields are required.");
+        return;
+    }
+
     try {
-      const response = await fetch("http://localhost:8000/api/leads/", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          name: formData.name,
-          email: formData.email,
-          message: `Loan Amount: $${formData.loanAmount}, Loan Term: ${formData.loanTerm} years, Interest Rate: ${formData.interestRate}%`,
-        }),
-      });
-
-      if (response.ok) {
-        setSubmissionStatus("Lead submitted successfully!");
-        // Optionally reset the form or handle success
-      } else {
-        setSubmissionStatus("Failed to submit lead.");
-      }
+        const response = await axios.post('http://127.0.0.1:8000/api/leads/', leadData);
+        console.log("Lead data submitted successfully:", response.data);
     } catch (error) {
-      console.error("Error submitting lead:", error);
-      setSubmissionStatus("An error occurred while submitting the lead.");
+        console.error("Error submitting lead data:", error.response ? error.response.data : error.message);
     }
   };
 
@@ -121,6 +120,7 @@ const LeadForm = () => {
                   onChange={handleInputChange}
                   step="0.01"
                   required
+                  placeholder="Enter interest rate"
                   className="form-input"
                 />
               </div>
@@ -147,7 +147,7 @@ const LeadForm = () => {
               </div>
             </div>
 
-            <form onSubmit={handleLeadCaptureSubmit} className="lead-capture-form">
+            <form className="lead-capture-form">
               <h3>Get Your Detailed Report</h3>
               <div className="form-group">
                 <input
@@ -185,7 +185,6 @@ const LeadForm = () => {
               <button type="submit" className="submit-button">
                 Get Free Report
               </button>
-              {submissionStatus && <p className="submission-status">{submissionStatus}</p>}
             </form>
           </div>
         )}
