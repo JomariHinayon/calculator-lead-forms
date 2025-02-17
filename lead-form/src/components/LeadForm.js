@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import "./LeadForm.css";
-import axios from 'axios'; // Import axios for making HTTP requests
+import axios from 'axios';
 
 const LeadForm = () => {
   const [formData, setFormData] = useState({
@@ -9,12 +9,13 @@ const LeadForm = () => {
     phone: "", 
     loanAmount: "",
     loanTerm: "",
-    interestRate: "", // Removed default value
+    interestRate: "5.99",
     monthlyIncome: "",
   });
 
   const [result, setResult] = useState(null);
   const [step, setStep] = useState(1);
+  const [showSuccess, setShowSuccess] = useState(false);
 
   const calculateLoan = () => {
     const principal = parseFloat(formData.loanAmount);
@@ -35,47 +36,86 @@ const LeadForm = () => {
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(`Input changed: ${name} = ${value}`); // Log the input change
+    console.log(`Input changed: ${name} = ${value}`);
     setFormData(prev => ({
       ...prev,
       [name]: value
     }));
   };
 
+  const resetForm = () => {
+    setFormData({
+      name: "",
+      email: "",
+      phone: "",
+      loanAmount: "",
+      loanTerm: "",
+      interestRate: "5.99",
+      monthlyIncome: "",
+    });
+    setResult(null);
+    setStep(1);
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
+    
+    // Validate loan calculation fields first
+    if (!formData.loanAmount || !formData.loanTerm || !formData.interestRate) {
+      console.error("Please fill in all loan calculation fields");
+      return;
+    }
+
     const calculations = calculateLoan();
     setResult(calculations);
-    setStep(2);
+    
+    if (step === 1) {
+      setStep(2);
+      return;
+    }
 
-    const leadData = {
+    // Only attempt to submit lead data if we're on step 2 and have contact info
+    if (step === 2) {
+      const leadData = {
         name: formData.name,
         email: formData.email,
         phone: formData.phone,
         loan_amount: parseFloat(formData.loanAmount),
         loan_term: parseInt(formData.loanTerm, 10),
         interest_rate: parseFloat(formData.interestRate),
-        monthly_income: parseFloat(formData.monthlyIncome),
-        message: "",
-    };
+        monthly_income: parseFloat(formData.monthlyIncome) || 0,
+        message: "Lead from loan calculator",
+      };
 
-    console.log("Form Data:", leadData); // Log the data being sent
+      console.log("Form Data:", leadData);
 
-    if (!leadData.name || !leadData.email || !leadData.phone || !leadData.loan_amount || !leadData.loan_term || !leadData.interest_rate) {
-        console.error("All fields are required.");
+      // Check for required fields
+      if (!leadData.name || !leadData.email || !leadData.phone || !leadData.loan_amount || !leadData.loan_term || !leadData.interest_rate) {
+        console.error("Please fill in all required fields");
         return;
-    }
+      }
 
-    try {
+      try {
         const response = await axios.post('http://127.0.0.1:8000/api/leads/', leadData);
         console.log("Lead data submitted successfully:", response.data);
-    } catch (error) {
+        setShowSuccess(true);
+        resetForm();
+        setTimeout(() => {
+          setShowSuccess(false);
+        }, 3000);
+      } catch (error) {
         console.error("Error submitting lead data:", error.response ? error.response.data : error.message);
+      }
     }
   };
 
   return (
     <div className="calculator-container">
+      {showSuccess && (
+        <div className={`success-popup ${!showSuccess ? 'hidden' : ''}`}>
+          Your report request has been submitted successfully!
+        </div>
+      )}
       <div className="calculator-header">
         <h2>Loan Calculator</h2>
         <p className="subtitle">Get your personalized loan estimate today</p>
@@ -85,10 +125,11 @@ const LeadForm = () => {
         {step === 1 ? (
           <form onSubmit={handleSubmit} className="calculator-form">
             <div className="form-group">
-              <label>Loan Amount ($)</label>
+              <label htmlFor="loanAmount">Loan Amount ($)</label>
               <input
                 type="number"
                 name="loanAmount"
+                id="loanAmount"
                 value={formData.loanAmount}
                 onChange={handleInputChange}
                 required
@@ -99,10 +140,11 @@ const LeadForm = () => {
 
             <div className="form-row">
               <div className="form-group">
-                <label>Loan Term (Years)</label>
+                <label htmlFor="loanTerm">Loan Term (Years)</label>
                 <input
                   type="number"
                   name="loanTerm"
+                  id="loanTerm"
                   value={formData.loanTerm}
                   onChange={handleInputChange}
                   required
@@ -112,15 +154,15 @@ const LeadForm = () => {
               </div>
 
               <div className="form-group">
-                <label>Interest Rate (%)</label>
+                <label htmlFor="interestRate">Interest Rate (%)</label>
                 <input
                   type="number"
                   name="interestRate"
+                  id="interestRate"
                   value={formData.interestRate}
                   onChange={handleInputChange}
                   step="0.01"
                   required
-                  placeholder="Enter interest rate"
                   className="form-input"
                 />
               </div>
@@ -147,7 +189,7 @@ const LeadForm = () => {
               </div>
             </div>
 
-            <form className="lead-capture-form">
+            <form onSubmit={handleSubmit} className="lead-capture-form">
               <h3>Get Your Detailed Report</h3>
               <div className="form-group">
                 <input
