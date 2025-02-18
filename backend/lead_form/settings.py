@@ -83,7 +83,7 @@ DATABASES = {
         'ENGINE': 'django.db.backends.postgresql',
         'NAME': 'calculator-leadform',  # Your database name
         'USER': 'postgres',             # Your PostgreSQL username
-        'PASSWORD': 'Karl#04',    # Your PostgreSQL password
+        'PASSWORD': config('DATABASE_PASSWORD'),  # Load from .env
         'HOST': 'localhost',            # Your PostgreSQL host
         'PORT': '5432',                # Your PostgreSQL port
     }
