@@ -18,7 +18,9 @@ class Lead(models.Model):
     loan_term = models.IntegerField(default=12)
     interest_rate = models.DecimalField(max_digits=5, decimal_places=2, default=Decimal('5.99'))
     monthly_income = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
-    message = models.TextField()
+    monthly_payment = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    total_payment = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
+    total_interest = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True)
 
     def __str__(self):
         return self.name

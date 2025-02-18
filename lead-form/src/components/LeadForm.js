@@ -48,18 +48,18 @@ const LeadForm = () => {
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     
-    if (name === 'loanAmount') {
+    if (name === 'loanAmount' || name === 'monthlyIncome') {
       // Remove any non-digit characters
       const cleanValue = value.replace(/[^\d]/g, '');
-      const loanValue = parseInt(cleanValue);
+      const numericValue = parseInt(cleanValue);
       
-      // Only check maximum limit while typing
-      if (cleanValue && loanValue > 10000000) {
+      // Only check maximum limit while typing for loan amount
+      if (name === 'loanAmount' && cleanValue && numericValue > 10000000) {
         setErrorMessage("Loan amount cannot exceed $10,000,000");
         return;
       }
       
-      const formattedValue = cleanValue ? loanValue.toLocaleString() : '';
+      const formattedValue = cleanValue ? numericValue.toLocaleString() : '';
       
       setFormData(prev => ({
         ...prev,
@@ -285,6 +285,17 @@ const LeadForm = () => {
                   value={formData.phone}
                   onChange={handleInputChange}
                   placeholder="Phone Number"
+                  required
+                  className="form-input"
+                />
+              </div>
+              <div className="form-group">
+                <input
+                  type="text"
+                  name="monthlyIncome"
+                  value={formData.monthlyIncome ? parseInt(formData.monthlyIncome).toLocaleString() : ''}
+                  onChange={handleInputChange}
+                  placeholder="Monthly Income"
                   required
                   className="form-input"
                 />
