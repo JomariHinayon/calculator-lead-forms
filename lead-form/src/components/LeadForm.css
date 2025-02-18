@@ -224,22 +224,60 @@
     animation: fadeIn 0.5s ease-out;
   }
   
-  .success-popup {
+  /* Error and Success Popups */
+  .popup-message {
     position: fixed;
-    top: 20px;
-    right: 20px;
-    background-color: #28a745;
-    color: white;
-    padding: 15px 20px;
-    border-radius: 8px;
-    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    padding: 20px 30px;
+    border-radius: 10px;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
     z-index: 1000;
-    transition: opacity 0.5s ease;
-    opacity: 1;
+    font-size: 16px;
+    font-weight: 500;
+    text-align: center;
+    animation: slideIn 0.3s ease-out;
   }
   
-  .success-popup.hidden {
-    opacity: 0;
-    pointer-events: none;
+  .error-popup {
+    background-color: #fff;
+    color: #dc3545;
+    border-left: 5px solid #dc3545;
+  }
+  
+  .success-popup {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 20px 30px;
+    border-radius: 10px;
+    box-shadow: 0 4px 15px rgba(40, 167, 69, 0.3);
+    animation: slideIn 0.3s ease-out;
+  }
+  
+  @keyframes slideIn {
+    from {
+      opacity: 0;
+      transform: translate(-50%, -60%);
+    }
+    to {
+      opacity: 1;
+      transform: translate(-50%, -50%);
+    }
+  }
+  
+  .popup-message.hidden {
+    animation: slideOut 0.3s ease-in forwards;
+  }
+  
+  @keyframes slideOut {
+    from {
+      opacity: 1;
+      transform: translate(-50%, -50%);
+    }
+    to {
+      opacity: 0;
+      transform: translate(-50%, -60%);
+    }
   }
   

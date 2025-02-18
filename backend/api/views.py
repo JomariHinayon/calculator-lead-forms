@@ -9,6 +9,10 @@ class LeadListCreate(generics.ListCreateAPIView):
     queryset = Lead.objects.all()
     serializer_class = LeadSerializer
 
+    def create(self, request, *args, **kwargs):
+        print("Received data:", request.data)  # Add this line for debugging
+        return super().create(request, *args, **kwargs)
+
 class LeadDetail(generics.RetrieveUpdateDestroyAPIView):
     queryset = Lead.objects.all()
     serializer_class = LeadSerializer

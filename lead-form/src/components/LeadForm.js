@@ -16,6 +16,7 @@ const LeadForm = () => {
   const [result, setResult] = useState(null);
   const [step, setStep] = useState(1);
   const [showSuccess, setShowSuccess] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const calculateLoan = () => {
     const principal = parseFloat(formData.loanAmount);
@@ -31,12 +32,47 @@ const LeadForm = () => {
     const totalPayment = (monthlyPayment * numberOfPayments).toFixed(2);
     const totalInterest = (totalPayment - principal).toFixed(2);
 
-    return { monthlyPayment, totalPayment, totalInterest };
+    return { 
+      monthlyPayment: formatCurrency(monthlyPayment), 
+      totalPayment: formatCurrency(totalPayment), 
+      totalInterest: formatCurrency(totalInterest) 
+    };
+  };
+
+  // New function to format currency
+  const formatCurrency = (amount) => {
+    return Number(amount).toLocaleString('en-US', { style: 'currency', currency: 'USD' });
   };
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
-    console.log(`Input changed: ${name} = ${value}`);
+    
+    if (name === 'loanAmount') {
+      // Remove any non-digit characters
+      const cleanValue = value.replace(/[^\d]/g, '');
+      const loanValue = parseInt(cleanValue);
+      
+      // Only check maximum limit while typing
+      if (cleanValue && loanValue > 10000000) {
+        setErrorMessage("Loan amount cannot exceed $10,000,000");
+        setTimeout(() => {
+          setErrorMessage("");
+        }, 3000);
+        return;
+      }
+      
+      const formattedValue = cleanValue ? loanValue.toLocaleString() : '';
+      
+      setFormData(prev => ({
+        ...prev,
+        [name]: cleanValue // Store clean value but display formatted
+      }));
+      
+      // Update the input display value with commas
+      e.target.value = formattedValue;
+      return;
+    }
+
     setFormData(prev => ({
       ...prev,
       [name]: value
@@ -60,7 +96,13 @@ const LeadForm = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    // Validate loan calculation fields first
+    // Check minimum amount only on submit
+    if (formData.loanAmount && parseInt(formData.loanAmount) < 1000) {
+      setErrorMessage("Loan amount must be at least $1,000");
+      return;
+    }
+    
+    // Validate loan calculation fields
     if (!formData.loanAmount || !formData.loanTerm || !formData.interestRate) {
       console.error("Please fill in all loan calculation fields");
       return;
@@ -111,9 +153,19 @@ const LeadForm = () => {
 
   return (
     <div className="calculator-container">
+      {errorMessage && (
+        <div className="popup-message error-popup">
+          {errorMessage}
+        </div>
+      )}
       {showSuccess && (
-        <div className={`success-popup ${!showSuccess ? 'hidden' : ''}`}>
-          Your report request has been submitted successfully!
+        <div className="popup-message success-popup">
+          <div className="success-icon">✓</div>
+          <div className="success-title">Success!</div>
+          <div className="success-message">
+            Your report request has been submitted successfully.
+            We'll get back to you shortly!
+          </div>
         </div>
       )}
       <div className="calculator-header">
@@ -127,10 +179,10 @@ const LeadForm = () => {
             <div className="form-group">
               <label htmlFor="loanAmount">Loan Amount ($)</label>
               <input
-                type="number"
+                type="text"
                 name="loanAmount"
                 id="loanAmount"
-                value={formData.loanAmount}
+                value={formData.loanAmount ? parseInt(formData.loanAmount).toLocaleString() : ''}
                 onChange={handleInputChange}
                 required
                 placeholder="Enter loan amount"
@@ -177,15 +229,15 @@ const LeadForm = () => {
             <div className="result-summary">
               <div className="result-item">
                 <h3>Monthly Payment</h3>
-                <p className="amount">${result.monthlyPayment}</p>
+                <p className="amount">{result.monthlyPayment}</p>
               </div>
               <div className="result-item">
                 <h3>Total Payment</h3>
-                <p className="amount">${result.totalPayment}</p>
+                <p className="amount">{result.totalPayment}</p>
               </div>
               <div className="result-item">
                 <h3>Total Interest</h3>
-                <p className="amount">${result.totalInterest}</p>
+                <p className="amount">{result.totalInterest}</p>
               </div>
             </div>
 
