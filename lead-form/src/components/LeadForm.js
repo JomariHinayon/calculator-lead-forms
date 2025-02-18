@@ -55,9 +55,6 @@ const LeadForm = () => {
       // Only check maximum limit while typing
       if (cleanValue && loanValue > 10000000) {
         setErrorMessage("Loan amount cannot exceed $10,000,000");
-        setTimeout(() => {
-          setErrorMessage("");
-        }, 3000);
         return;
       }
       
@@ -77,6 +74,11 @@ const LeadForm = () => {
       ...prev,
       [name]: value
     }));
+  };
+
+  // Add handlers for click and touch events
+  const handleInteraction = () => {
+    setErrorMessage("");
   };
 
   const resetForm = () => {
@@ -152,7 +154,7 @@ const LeadForm = () => {
   };
 
   return (
-    <div className="calculator-container">
+    <div className="calculator-container" onClick={handleInteraction}>
       {errorMessage && (
         <div className="popup-message error-popup">
           {errorMessage}
@@ -166,6 +168,7 @@ const LeadForm = () => {
             Your report request has been submitted successfully.
             We'll get back to you shortly!
           </div>
+          <button className="close-button" onClick={() => setShowSuccess(false)}>Close</button>
         </div>
       )}
       <div className="calculator-header">
@@ -184,6 +187,8 @@ const LeadForm = () => {
                 id="loanAmount"
                 value={formData.loanAmount ? parseInt(formData.loanAmount).toLocaleString() : ''}
                 onChange={handleInputChange}
+                onClick={handleInteraction}
+                onTouchStart={handleInteraction}
                 required
                 placeholder="Enter loan amount"
                 className="form-input"
@@ -199,6 +204,8 @@ const LeadForm = () => {
                   id="loanTerm"
                   value={formData.loanTerm}
                   onChange={handleInputChange}
+                  onClick={handleInteraction}
+                  onTouchStart={handleInteraction}
                   required
                   placeholder="Enter term"
                   className="form-input"
@@ -213,6 +220,8 @@ const LeadForm = () => {
                   id="interestRate"
                   value={formData.interestRate}
                   onChange={handleInputChange}
+                  onClick={handleInteraction}
+                  onTouchStart={handleInteraction}
                   step="0.01"
                   required
                   className="form-input"
