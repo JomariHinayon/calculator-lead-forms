@@ -17,6 +17,7 @@ const LeadForm = () => {
   const [step, setStep] = useState(1);
   const [showSuccess, setShowSuccess] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
 
   const calculateLoan = () => {
     const principal = parseFloat(formData.loanAmount);
@@ -139,6 +140,8 @@ const LeadForm = () => {
         return;
       }
 
+      setIsLoading(true);
+
       try {
         const response = await axios.post('http://127.0.0.1:8000/api/leads/', leadData);
         console.log("Lead data submitted successfully:", response.data);
@@ -149,6 +152,8 @@ const LeadForm = () => {
         }, 3000);
       } catch (error) {
         console.error("Error submitting lead data:", error.response ? error.response.data : error.message);
+      } finally {
+        setIsLoading(false);
       }
     }
   };
@@ -168,7 +173,6 @@ const LeadForm = () => {
             Your report request has been submitted successfully.
             We'll get back to you shortly!
           </div>
-          <button className="close-button" onClick={() => setShowSuccess(false)}>Close</button>
         </div>
       )}
       <div className="calculator-header">
@@ -285,8 +289,8 @@ const LeadForm = () => {
                   className="form-input"
                 />
               </div>
-              <button type="submit" className="submit-button">
-                Get Free Report
+              <button type="submit" className="submit-button" disabled={isLoading}>
+                {isLoading ? 'Sending...' : 'Get Free Report'}
               </button>
             </form>
           </div>
